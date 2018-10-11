@@ -596,6 +596,157 @@ table_4</code></pre>
 </table>
 </div>
 </div>
+<div id="october-11-lecture" class="section level2">
+<h2>October 11 Lecture</h2>
+<div id="scrape-a-table" class="section level3">
+<h3>Scrape a table</h3>
+<p>First get the HTML</p>
+<pre class="r"><code>url = &quot;http://samhda.s3-us-gov-west-1.amazonaws.com/s3fs-public/field-uploads/2k15StateFiles/NSDUHsaeShortTermCHG2015.htm&quot;
+
+drug_use_xml = read_html(url)
+
+drug_use_xml</code></pre>
+<pre><code>## {xml_document}
+## &lt;html lang=&quot;en&quot;&gt;
+## [1] &lt;head&gt;\n&lt;link rel=&quot;P3Pv1&quot; href=&quot;http://www.samhsa.gov/w3c/p3p.xml&quot;&gt;\ ...
+## [2] &lt;body&gt;\r\n\r\n&lt;noscript&gt;\r\n&lt;p&gt;Your browser's Javascript is off. Hyp ...</code></pre>
+<p>Get the first table from the HTML (%&gt;% .[[1]]) (This gives the same result as the following code chunk)</p>
+<pre class="r"><code>drug_use_xml %&gt;%
+  html_nodes(css = &quot;table&quot;) %&gt;%
+  .[[1]] %&gt;%
+  html_table() %&gt;%
+  slice(-1) %&gt;%
+  as_tibble() %&gt;% View</code></pre>
+<pre class="r"><code>table_marj = (drug_use_xml %&gt;% html_nodes(css = &quot;table&quot;))[[1]] %&gt;%
+  html_table()  %&gt;%
+  .[-1,] %&gt;% 
+  as_tibble()
+
+table_marj</code></pre>
+<pre><code>## # A tibble: 56 x 16
+##    State `12+(2013-2014)` `12+(2014-2015)` `12+(P Value)` `12-17(2013-201~
+##  * &lt;chr&gt; &lt;chr&gt;            &lt;chr&gt;            &lt;chr&gt;          &lt;chr&gt;           
+##  1 Tota~ 12.90a           13.36            0.002          13.28b          
+##  2 Nort~ 13.88a           14.66            0.005          13.98           
+##  3 Midw~ 12.40b           12.76            0.082          12.45           
+##  4 South 11.24a           11.64            0.029          12.02           
+##  5 West  15.27            15.62            0.262          15.53a          
+##  6 Alab~ 9.98             9.60             0.426          9.90            
+##  7 Alas~ 19.60a           21.92            0.010          17.30           
+##  8 Ariz~ 13.69            13.12            0.364          15.12           
+##  9 Arka~ 11.37            11.59            0.678          12.79           
+## 10 Cali~ 14.49            15.25            0.103          15.03           
+## # ... with 46 more rows, and 11 more variables: `12-17(2014-2015)` &lt;chr&gt;,
+## #   `12-17(P Value)` &lt;chr&gt;, `18-25(2013-2014)` &lt;chr&gt;,
+## #   `18-25(2014-2015)` &lt;chr&gt;, `18-25(P Value)` &lt;chr&gt;,
+## #   `26+(2013-2014)` &lt;chr&gt;, `26+(2014-2015)` &lt;chr&gt;, `26+(P Value)` &lt;chr&gt;,
+## #   `18+(2013-2014)` &lt;chr&gt;, `18+(2014-2015)` &lt;chr&gt;, `18+(P Value)` &lt;chr&gt;</code></pre>
+</div>
+<div id="learning-assessment" class="section level3">
+<h3>Learning Assessment</h3>
+<p>Extract table from cost of living of nyc page</p>
+<pre class="r"><code>url2 = &quot;https://www.bestplaces.net/cost_of_living/city/new_york/new_york&quot;
+
+cost_of_living = read_html(url2)
+
+nyc_COL = cost_of_living %&gt;%
+  html_nodes(css = &quot;table&quot;) %&gt;%
+  .[[1]] %&gt;%
+  html_table(header = TRUE) 
+
+nyc_COL</code></pre>
+<pre><code>##     COST OF LIVING New York New York      USA
+## 1          Overall      180      122      100
+## 2          Grocery      125    111.6      100
+## 3           Health      110      109      100
+## 4          Housing      313      145      100
+## 5 Median Home Cost $662,100 $282,000 $216,200
+## 6        Utilities      128      118      100
+## 7   Transportation      107      110      100
+## 8    Miscellaneous      120      110      100</code></pre>
+</div>
+<div id="harry-potter" class="section level3">
+<h3>Harry Potter</h3>
+<pre class="r"><code>hpsaga_html = read_html(&quot;https://www.imdb.com/list/ls000630791/&quot;)
+
+titles = hpsaga_html %&gt;%
+  html_nodes(css = &quot;.lister-item-header a&quot;) %&gt;%
+  html_text()
+
+money = hpsaga_html %&gt;%
+  html_nodes(css = &quot;.text-muted .ghost~ .text-muted+ span&quot;) %&gt;%
+  html_text()
+
+hpsaga_df = tibble(
+  title = titles,
+  gross_rev = money
+)</code></pre>
+</div>
+<div id="napoleon-dynamite" class="section level3">
+<h3>Napoleon Dynamite</h3>
+<pre class="r"><code>url = &quot;https://www.amazon.com/product-reviews/B00005JNBQ/ref=cm_cr_arp_d_viewopt_rvwer?ie=UTF8&amp;reviewerType=avp_only_reviews&amp;sortBy=recent&amp;pageNumber=1&quot;
+
+dynamite_html = read_html(url)
+
+review_titles = dynamite_html %&gt;%
+  html_nodes(&quot;#cm_cr-review_list .review-title&quot;) %&gt;%
+  html_text()
+
+review_stars = dynamite_html %&gt;%
+  html_nodes(&quot;#cm_cr-review_list .review-rating&quot;) %&gt;%
+  html_text()
+
+review_text = dynamite_html %&gt;%
+    html_nodes(&quot;.review-data:nth-child(4)&quot;) %&gt;%
+    html_text()
+
+reviews = tibble(
+  title = review_titles,
+  stars = review_stars,
+  text = review_text
+)</code></pre>
+</div>
+<div id="water-consumption" class="section level3">
+<h3>Water Consumption</h3>
+<p>Get the water data</p>
+<pre class="r"><code>nyc_water = GET(&quot;https://data.cityofnewyork.us/resource/waf7-5gvc.csv&quot;) %&gt;% 
+  content(&quot;parsed&quot;)</code></pre>
+<pre><code>## Parsed with column specification:
+## cols(
+##   new_york_city_population = col_double(),
+##   nyc_consumption_million_gallons_per_day = col_double(),
+##   per_capita_gallons_per_person_per_day = col_integer(),
+##   year = col_integer()
+## )</code></pre>
+<p>As JSON</p>
+<pre class="r"><code>nyc_water_json = GET(&quot;https://data.cityofnewyork.us/resource/waf7-5gvc.json&quot;) %&gt;%
+  content(&quot;text&quot;) %&gt;%
+  jsonlite::fromJSON() %&gt;%
+  as_tibble()</code></pre>
+</div>
+<div id="brfss" class="section level3">
+<h3>BRFSS</h3>
+<pre class="r"><code>brfss_smart2010 = 
+  GET(&quot;https://data.cdc.gov/api/views/acme-vg9e/rows.csv?accessType=DOWNLOAD&quot;) %&gt;% 
+  content(&quot;parsed&quot;)</code></pre>
+<pre><code>## Parsed with column specification:
+## cols(
+##   .default = col_character(),
+##   Year = col_integer(),
+##   Sample_Size = col_integer(),
+##   Data_value = col_double(),
+##   Confidence_limit_Low = col_double(),
+##   Confidence_limit_High = col_double(),
+##   Display_order = col_integer()
+## )</code></pre>
+<pre><code>## See spec(...) for full column specifications.</code></pre>
+</div>
+<div id="pokemon" class="section level3">
+<h3>Pokemon</h3>
+<pre class="r"><code>poke = GET(&quot;http://pokeapi.co/api/v2/pokemon/1&quot;) %&gt;%
+  content()</code></pre>
+</div>
+</div>
 
 
 
